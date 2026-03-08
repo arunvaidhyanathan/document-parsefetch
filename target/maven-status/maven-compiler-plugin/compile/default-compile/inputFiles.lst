@@ -1,0 +1,16 @@
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/repository/DocumentRepository.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/service/PerformanceTrackingService.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/exception/DocumentNotFoundException.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/service/ParsingService.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/repository/PerformanceMetricsRepository.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/config/AsyncConfig.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/controller/SearchController.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/config/TikaConfig.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/exception/ParsingException.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/controller/PerformanceController.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/entity/DocumentRecord.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/controller/DocumentController.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/service/DocumentSearchService.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/exception/GlobalExceptionHandler.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/DocumentParserApplication.java
+/Users/arunvaidhyanathan/Developer/document-parsefetch/src/main/java/com/org/parser/entity/PerformanceMetrics.java

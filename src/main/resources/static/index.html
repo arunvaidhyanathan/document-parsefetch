@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Parser - Upload & Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-section {
+            text-align: center;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .selected-file {
+            margin: 15px 0;
+            padding: 10px 20px;
+            background: #f0f4ff;
+            border-radius: 6px;
+            color: #333;
+            display: none;
+        }
+
+        .selected-file.show {
+            display: block;
+        }
+
+        .upload-btn {
+            padding: 15px 50px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .upload-btn.show {
+            display: inline-block;
+        }
+
+        .upload-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .upload-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .status.processing {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #f59e0b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .progress-bar.show {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            animation: progress-animation 1.5s infinite;
+        }
+
+        @keyframes progress-animation {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .result-card {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .result-card h3 {
+            margin-bottom: 15px;
+            color: #374151;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .result-value {
+            color: #111827;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-box {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .view-details-btn {
+            margin-top: 15px;
+            padding: 10px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .view-details-btn:hover {
+            background: #5568d3;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 1em;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Document Parser</h1>
+            <p>Upload documents for intelligent parsing and search</p>
+        </div>
+
+        <div class="card">
+            <div class="tab-container">
+                <button class="tab active" onclick="switchTab('upload')">Upload Document</button>
+                <button class="tab" onclick="switchTab('search')">Search Documents</button>
+            </div>
+
+            <!-- Upload Tab -->
+            <div id="upload-tab" class="tab-content active">
+                <div class="upload-section">
+                    <h2>Upload Document</h2>
+                    <p style="color: #6b7280; margin: 10px 0 20px 0;">
+                        Supported formats: PDF, DOCX, TXT, PNG, JPG, ZIP and more
+                    </p>
+
+                    <div class="file-input-wrapper">
+                        <input type="file" id="fileInput" accept="*/*" onchange="handleFileSelect(event)">
+                        <label for="fileInput" class="file-input-label">
+                            📁 Choose File
+                        </label>
+                    </div>
+
+                    <div id="selectedFile" class="selected-file"></div>
+
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill"></div>
+                    </div>
+
+                    <button id="uploadBtn" class="upload-btn" onclick="uploadDocument()">
+                        🚀 Upload & Parse
+                    </button>
+
+                    <div id="status" class="status"></div>
+
+                    <div id="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Search Tab -->
+            <div id="search-tab" class="tab-content">
+                <div class="upload-section">
+                    <h2>Search Documents</h2>
+                    <p style="color: #6b7280; margin: 10px 0 20px 0;">
+                        Search through parsed documents using keywords or exact phrases
+                    </p>
+
+                    <div style="margin: 20px 0;">
+                        <input type="text" id="searchInput" placeholder="Enter search query..."
+                               style="width: 100%; padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1em;"
+                               onkeypress="if(event.key === 'Enter') searchDocuments()">
+
+                        <div style="margin: 15px 0;">
+                            <label style="margin-right: 20px;">
+                                <input type="radio" name="searchType" value="false" checked> Keyword Search (FTS)
+                            </label>
+                            <label>
+                                <input type="radio" name="searchType" value="true"> Exact Phrase
+                            </label>
+                        </div>
+
+                        <button onclick="searchDocuments()" style="padding: 12px 40px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+                            🔍 Search
+                        </button>
+                    </div>
+
+                    <div id="searchResults" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        function handleFileSelect(event) {
+            selectedFile = event.target.files[0];
+            const fileDisplay = document.getElementById('selectedFile');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            if (selectedFile) {
+                const fileSize = (selectedFile.size / 1024).toFixed(2);
+                fileDisplay.innerHTML = `
+                    <strong>Selected:</strong> ${selectedFile.name}
+                    <span style="color: #6b7280;">(${fileSize} KB)</span>
+                `;
+                fileDisplay.classList.add('show');
+                uploadBtn.classList.add('show');
+            }
+        }
+
+        async function uploadDocument() {
+            if (!selectedFile) {
+                showStatus('Please select a file first', 'error');
+                return;
+            }
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const statusDiv = document.getElementById('status');
+
+            uploadBtn.disabled = true;
+            progressBar.classList.add('show');
+            statusDiv.classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                showStatus('Uploading document...', 'processing');
+
+                const response = await fetch('/api/v1/docs/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const documentId = await response.text();
+                showStatus('Document uploaded! Parsing in progress...', 'processing');
+
+                // Poll for status
+                await pollDocumentStatus(documentId);
+
+            } catch (error) {
+                showStatus('Upload failed: ' + error.message, 'error');
+                uploadBtn.disabled = false;
+                progressBar.classList.remove('show');
+            }
+        }
+
+        async function pollDocumentStatus(documentId) {
+            const maxAttempts = 30;
+            let attempts = 0;
+
+            const interval = setInterval(async () => {
+                attempts++;
+
+                try {
+                    const response = await fetch(`/api/v1/docs/${documentId}`);
+                    const doc = await response.json();
+
+                    if (doc.status === 'COMPLETED') {
+                        clearInterval(interval);
+                        displayResults(doc);
+                        document.getElementById('progressBar').classList.remove('show');
+                        document.getElementById('uploadBtn').disabled = false;
+                    } else if (doc.status === 'FAILED') {
+                        clearInterval(interval);
+                        showStatus('Parsing failed: ' + (doc.errorLog || 'Unknown error'), 'error');
+                        document.getElementById('progressBar').classList.remove('show');
+                        document.getElementById('uploadBtn').disabled = false;
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(interval);
+                        showStatus('Parsing timeout. Document ID: ' + documentId, 'error');
+                        document.getElementById('progressBar').classList.remove('show');
+                        document.getElementById('uploadBtn').disabled = false;
+                    }
+                } catch (error) {
+                    clearInterval(interval);
+                    showStatus('Error checking status: ' + error.message, 'error');
+                    document.getElementById('progressBar').classList.remove('show');
+                    document.getElementById('uploadBtn').disabled = false;
+                }
+            }, 1000);
+        }
+
+        function displayResults(doc) {
+            showStatus('✅ Document parsed successfully!', 'success');
+
+            const resultDiv = document.getElementById('result');
+            const chunksCount = doc.parsedContent ? doc.parsedContent.length : 0;
+            const metadataCount = doc.metadata ? Object.keys(doc.metadata).length : 0;
+            const contentPreview = doc.parsedContent && doc.parsedContent.length > 0
+                ? doc.parsedContent[0].substring(0, 200) + '...'
+                : 'No content';
+
+            resultDiv.innerHTML = `
+                <div class="result-card">
+                    <h3>📊 Parsing Results</h3>
+                    <div class="result-row">
+                        <span class="result-label">Document ID:</span>
+                        <span class="result-value">${doc.id}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Filename:</span>
+                        <span class="result-value">${doc.filename}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Status:</span>
+                        <span class="result-value" style="color: #10b981; font-weight: bold;">${doc.status}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Classification:</span>
+                        <span class="result-value">${doc.classification || 'Unclassified'}</span>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div class="metric-label">Text Chunks</div>
+                            <div class="metric-value">${chunksCount}</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Metadata Fields</div>
+                            <div class="metric-value">${metadataCount}</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Content Type</div>
+                            <div class="metric-value" style="font-size: 0.9em;">${doc.contentType || 'Unknown'}</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 6px;">
+                        <strong>Content Preview:</strong>
+                        <p style="margin-top: 10px; color: #374151; line-height: 1.6;">${contentPreview}</p>
+                    </div>
+
+                    <button class="view-details-btn" onclick="viewFullDetails(${doc.id})">
+                        View Full Details
+                    </button>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+
+        async function searchDocuments() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const exact = document.querySelector('input[name="searchType"]:checked').value;
+            const resultsDiv = document.getElementById('searchResults');
+
+            resultsDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Searching...</p>';
+
+            try {
+                const response = await fetch(`/api/v1/search/content?query=${encodeURIComponent(query)}&exact=${exact}`);
+                const results = await response.json();
+
+                if (results.length === 0) {
+                    resultsDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">No documents found</p>';
+                    return;
+                }
+
+                let html = `<h3 style="margin-bottom: 15px;">Found ${results.length} document(s)</h3>`;
+                results.forEach(doc => {
+                    const preview = doc.parsedContent && doc.parsedContent.length > 0
+                        ? doc.parsedContent[0].substring(0, 150) + '...'
+                        : 'No content preview';
+
+                    html += `
+                        <div class="result-card" style="margin-bottom: 15px;">
+                            <div class="result-row">
+                                <span class="result-label">ID: ${doc.id}</span>
+                                <span class="result-value">${doc.filename}</span>
+                            </div>
+                            <p style="margin-top: 10px; color: #6b7280; font-size: 0.9em;">${preview}</p>
+                            <button class="view-details-btn" onclick="viewFullDetails(${doc.id})" style="margin-top: 10px; padding: 8px 20px; font-size: 0.9em;">
+                                View Details
+                            </button>
+                        </div>
+                    `;
+                });
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: #ef4444;">Search failed: ${error.message}</p>`;
+            }
+        }
+
+        async function viewFullDetails(docId) {
+            try {
+                const response = await fetch(`/api/v1/docs/${docId}`);
+                const doc = await response.json();
+
+                const details = JSON.stringify(doc, null, 2);
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`
+                    <html>
+                    <head><title>Document ${docId} Details</title></head>
+                    <body style="font-family: monospace; padding: 20px; background: #f9fafb;">
+                        <h2>Document ${docId} - Full Details</h2>
+                        <pre style="background: white; padding: 20px; border-radius: 8px; overflow: auto;">${details}</pre>
+                    </body>
+                    </html>
+                `);
+            } catch (error) {
+                alert('Failed to load document details: ' + error.message);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status show ' + type;
+        }
+    </script>
+</body>
+</html>
