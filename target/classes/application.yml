@@ -3,9 +3,9 @@ spring:
     name: document-parsing-service
 
   datasource:
-    url: jdbc:postgresql://ep-wispy-haze-a5xy9c41-pooler.us-east-2.aws.neon.tech/workflow?sslmode=require
-    username: neondb_owner
-    password: npg_gGn7dzXVHJ9E
+    url: jdbc:postgresql://localhost:5432/document_management
+    username: 
+    password: 
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
